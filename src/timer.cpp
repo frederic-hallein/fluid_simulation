@@ -1,33 +1,23 @@
+#include <SDL2/SDL.h>
 #include <iostream>
-#include <cmath>
 
 #include "Timer.hpp"
 
-Timer::Timer(double p_time)
-{
-    old_time = p_time;
-}
+static const int FPS = 60;
+static const int frame_delay = 1000 / FPS;
+
+Timer::Timer() {}
 
 Timer::~Timer() {}
 
-void Timer::start()
+void Timer::start() {frame_start = SDL_GetTicks();}
+
+void Timer::stop() {frame_time = SDL_GetTicks() - frame_start;}
+
+void Timer::delayFrame()
 {
-    start_time = std::chrono::high_resolution_clock::now();
+    if (frame_delay > frame_time) {SDL_Delay(frame_delay - frame_time);}
 }
-
-void Timer::stop()
-{
-    end_time = std::chrono::high_resolution_clock::now();
-    time = std::chrono::time_point_cast<std::chrono::milliseconds>(end_time).time_since_epoch().count();
-
-    frame_time = (time - old_time) / 1000.0;
-
-    double FPS = 1.0 / frame_time;
-    //std::cout << "FPS = " << (int)FPS << " \n";
-}
-
-double Timer::getTime() {return time;}
-double Timer::getFrameTime() {return frame_time;}
 
 
 

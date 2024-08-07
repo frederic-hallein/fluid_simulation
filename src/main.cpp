@@ -4,25 +4,23 @@
 #include "Game.hpp"
 #include "Timer.hpp"
 
-const int SCREEN_WIDTH = 1200;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 400;
 
 int main(int argc, char* argv[]){
     Game game;
-    game.init("Ray Casting", SCREEN_WIDTH, SCREEN_HEIGHT);
+    game.init("Fluid Simulation", SCREEN_WIDTH, SCREEN_HEIGHT, false);
 
-    double old_time = 0; 
+    Timer timer; 
     while (game.running()){
-        Timer timer(old_time); 
+        timer.start();
+
         game.handleEvents();
+        game.render();
         game.update();
 
-        timer.start();
-        game.render();
         timer.stop();
-
-        old_time = timer.getTime();
-        game.setSpeedModifierPlayer(timer.getFrameTime());
+        timer.delayFrame();
     }
 
     game.clean();
