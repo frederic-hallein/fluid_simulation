@@ -3,6 +3,8 @@
 #include "Game.hpp"
 
 
+const int GRAV_ACC = 9.81;
+
 Game::Game() {}
 
 Game::~Game() {}
@@ -30,22 +32,31 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
         std::cout << "Error: " << SDL_GetError() << '\n';
     }
 
+    // keep hold of SCREEN_WIDTH and SCREEN_HEIGHT
+    this->w = SCREEN_WIDTH; 
+    this->h = SCREEN_HEIGHT;
+    
+    this->grid_w = SCREEN_WIDTH / grid_size;
+    this->grid_h = SCREEN_HEIGHT / grid_size;
+
     // initialize grid blocks
-    for (int x = 0; x < SCREEN_WIDTH / grid_size; x++)
+    for (int i = -1; i < grid_w + 1; i++)
     {    
-        for (int y = 0; y < SCREEN_HEIGHT / grid_size; y++){
-            GridBlock grid_block(renderer, grid_size, x, y);
+        for (int j = -1; j < grid_h + 1; j++)
+        {
+            GridBlock grid_block(renderer, grid_size, i, j);
             grid_blocks.push_back(std::vector<GridBlock>());
-            grid_blocks[x].push_back(grid_block);
+            grid_blocks[i].push_back(grid_block);
 
+            if (i < 0 || i > grid_w || j < 0 || j > grid_h)
+            {
+                //grid_blocks[i][j].get_s_bottom();
+            }
 
-        
+            
         }
     }
 
-    // keep hold of SCREEN_WIDTH and SCREEN_HEIGHT
-    this->w = SCREEN_WIDTH;
-    this->h = SCREEN_HEIGHT;
 
 
 
@@ -70,7 +81,41 @@ void Game::handleEvents()
 
 void Game::update()
 {
+    for (int i = 0; i < w / grid_size; i++)
+    {
+        for (int j = 0; j < h / grid_size; j++)
+        {
+            double v_bottom = grid_blocks[i][j].get_v_bottom();
+            double v_top = grid_blocks[i][j].get_v_top();
+            double u_left = grid_blocks[i][j].get_u_left();
+            double u_right = grid_blocks[i][j].get_u_right();
 
+            
+            /*
+            double s_bottom = grid_blocks[i][j].get_s_bottom();
+            double s_top = grid_blocks[i][j].get_s_top();
+            double s_left = grid_blocks[i][j].get_s_left();
+            double s_right = grid_blocks[i][j].get_s_right();
+            */
+
+            // gravity 
+            v_bottom += delta_t * GRAV_ACC;
+            v_top += delta_t * GRAV_ACC;
+
+            // incompressibility
+            double d, s;
+            d += u_right - u_left + v_top - v_bottom;
+            //s += 
+
+            u_left += d/4;
+            u_right -= d/4;
+            v_bottom += d/4;
+            v_top -= d/4;
+
+
+            grid_blocks[i][j].set_velocity(v_bottom, v_top, u_left, u_right);
+        }
+    }
 }
 
 void Game::render()
@@ -95,10 +140,19 @@ void Game::render()
     }
 
     //color squares
-    grid_blocks[5][3].draw();
-    grid_blocks[2][10].draw();
-    grid_blocks[8][8].draw();
-    grid_blocks[40][30].draw();
+    for (int i = 0; i < w / grid_size; i++)
+    {
+        //std::cout << i << '\n';
+        for (int j = 10; j <= 15; j++)
+        {
+            grid_blocks[i][j].draw();
+        }
+    }
+    //grid_blocks[5][3].draw();
+    //grid_blocks[2][10].draw();
+    //grid_blocks[8][8].draw();
+    //grid_blocks[40][30].draw();
+    
 
 
     SDL_RenderPresent(renderer);

@@ -19,8 +19,10 @@ public:
     bool running();
 
 private:
-    int w;
-    int h;
+    int w; int grid_w;
+    int h; int grid_h;
+
+    double delta_t = 0.3;
 
     bool is_running = true;   
     SDL_Window* window = nullptr;

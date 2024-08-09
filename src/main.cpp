@@ -7,7 +7,8 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 400;
 
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[])
+{
     Game game;
     game.init("Fluid Simulation", SCREEN_WIDTH, SCREEN_HEIGHT, false);
 
