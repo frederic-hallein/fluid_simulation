@@ -86,6 +86,7 @@ void Game::update()
     {
         for (int j = 0; j < h / grid_size; j++)
         {
+            // TODO: fixme
             double v       = grid_blocks[i][j].get_v();
             double v_up    = grid_blocks[i][j-1].get_v();
             double v_right = grid_blocks[i+1][j].get_v();
