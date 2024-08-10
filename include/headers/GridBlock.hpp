@@ -10,18 +10,13 @@ public:
     int get_x_pos();
     int get_y_pos();
 
-    void set_velocity(double v_bottom, double v_top, double u_left, double v_right);
-    void set_wall();
+    void set_velocity(double v, double u);
     
-    double get_v_bottom();
-    double get_v_top();
-    double get_u_left();
-    double get_u_right();
+    double get_v();
+    double get_u();
 
-    double get_s_bottom();
-    double get_s_top();
-    double get_s_left();
-    double get_s_right();
+    void set_wall();
+    int get_s();
 
     void draw();
     
@@ -34,14 +29,9 @@ private:
     int x_pos;
     int y_pos;
 
-    double v_bottom = 0.0;
-    double v_top = 0.0;
-    double u_left = 0.0;
-    double u_right = 0.0;
+    double v = 0.0;
+    double u = 0.0;
+    int s = 0;
 
-    double s_bottom = 1;
-    double s_top = 1;
-    double s_left = 1;
-    double s_right = 1;
 
 };

@@ -48,9 +48,10 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
             grid_blocks.push_back(std::vector<GridBlock>());
             grid_blocks[i].push_back(grid_block);
 
+            // set border cells
             if (i < 0 || i > grid_w || j < 0 || j > grid_h)
             {
-                //grid_blocks[i][j].get_s_bottom();
+                grid_blocks[i][j].set_wall();
             }
 
             
@@ -85,35 +86,41 @@ void Game::update()
     {
         for (int j = 0; j < h / grid_size; j++)
         {
-            double v_bottom = grid_blocks[i][j].get_v_bottom();
-            double v_top = grid_blocks[i][j].get_v_top();
-            double u_left = grid_blocks[i][j].get_u_left();
-            double u_right = grid_blocks[i][j].get_u_right();
+            double v       = grid_blocks[i][j].get_v();
+            double v_up    = grid_blocks[i][j-1].get_v();
+            double v_right = grid_blocks[i+1][j].get_v();
+            double v_down  = grid_blocks[i][j+1].get_v();
+            double v_left  = grid_blocks[i+1][j].get_v();
 
+            double u       = grid_blocks[i][j].get_u();
+            double u_up    = grid_blocks[i][j-1].get_u();
+            double u_right = grid_blocks[i+1][j].get_u();
+            double u_down  = grid_blocks[i][j+1].get_u();
+            double u_left  = grid_blocks[i+1][j].get_u();
             
-            /*
-            double s_bottom = grid_blocks[i][j].get_s_bottom();
-            double s_top = grid_blocks[i][j].get_s_top();
-            double s_left = grid_blocks[i][j].get_s_left();
-            double s_right = grid_blocks[i][j].get_s_right();
-            */
-
+            int s       = grid_blocks[i][j].get_s();
+            int s_up    = grid_blocks[i][j-1].get_s();
+            int s_right = grid_blocks[i+1][j].get_s();
+            int s_down  = grid_blocks[i][j+1].get_s();
+            int s_left  = grid_blocks[i-1][j].get_s();
+            
             // gravity 
-            v_bottom += delta_t * GRAV_ACC;
-            v_top += delta_t * GRAV_ACC;
+            v += delta_t * GRAV_ACC;
 
             // incompressibility
-            double d, s;
-            d += u_right - u_left + v_top - v_bottom;
-            //s += 
+            double d = u_right - u + v_down - v;
+            int total_s = s_right + s_left + s_down + s_up;
 
-            u_left += d/4;
-            u_right -= d/4;
-            v_bottom += d/4;
-            v_top -= d/4;
+            u       += d * (s_left / total_s);
+            u_right -= d * (s_right / total_s);
+            v       += d * (s_up / total_s);
+            v_down  -= d * (s_down / total_s);
 
-
-            grid_blocks[i][j].set_velocity(v_bottom, v_top, u_left, u_right);
+            // update velocity
+            grid_blocks[i][j].set_velocity(v, u);
+            grid_blocks[i+1][j].set_velocity(v_right, u_right);
+            grid_blocks[i][j+1].set_velocity(v_down, u_down);
+            
         }
     }
 }

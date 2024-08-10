@@ -14,31 +14,19 @@ int GridBlock::get_x_pos() {return x_pos;}
 
 int GridBlock::get_y_pos() {return y_pos;}
 
-void GridBlock::set_velocity(double v_bottom, double v_top, double u_left, double v_right)
+void GridBlock::set_velocity(double v, double u)
 {
-    this->v_bottom = v_bottom;
-    this->v_top = v_top;
-    this->u_left = u_left;
-    this->u_right = u_right;
+    this->v= v;
+    this->u= u;
 }
 
-void GridBlock::set_wall() {}
+double GridBlock::get_v() {return v;}
 
-double GridBlock::get_v_bottom() {return v_bottom;}
+double GridBlock::get_u() {return u;}
 
-double GridBlock::get_v_top() {return v_top;}
+void GridBlock::set_wall() {this->s = 1;}
 
-double GridBlock::get_u_left() {return u_left;}
-
-double GridBlock::get_u_right() {return u_right;}
-
-double GridBlock::get_s_bottom() {return s_bottom;}
-
-double GridBlock::get_s_top() {return s_top;}
-
-double GridBlock::get_s_left() {return s_left;}
-
-double GridBlock::get_s_right() {return s_right;}
+int GridBlock::get_s() {return s;}
 
 void GridBlock::draw()
 {
