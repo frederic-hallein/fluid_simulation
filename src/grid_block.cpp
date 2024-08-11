@@ -24,14 +24,20 @@ double GridBlock::get_v() {return v;}
 
 double GridBlock::get_u() {return u;}
 
-void GridBlock::set_wall() {this->s = 1;}
+void GridBlock::set_wall() {this->s = 0;}
 
 int GridBlock::get_s() {return s;}
 
+void GridBlock::set_p(double p) {this->p=p;}
+
+double GridBlock::get_p() {return p;}
+
+double GridBlock::get_rho() {return rho;}
+
 void GridBlock::draw()
 {
-    rect.x = x_pos * grid_size;
-    rect.y = y_pos * grid_size;
+    rect.x = (x_pos - 1) * grid_size;
+    rect.y = (y_pos - 1) * grid_size;
     rect.w = grid_size;
     rect.h = grid_size;
     SDL_RenderFillRect(renderer, &rect);

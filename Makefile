@@ -7,6 +7,8 @@ OBJS = src/*.cpp
 #CC specifies which compiler we're using
 CC = g++
 
+STD = -std=c++20
+
 #INC
 INC = -Iinclude/headers
 
@@ -22,7 +24,7 @@ OBJ_NAME = main
 
 #This is the target that compiles our executable
 all: 
-	$(CC) $(INC) -o $(OBJ_NAME) $(OBJS) $(LINKER_FLAGS) 
+	$(CC) $(INC) $(STD) -o $(OBJ_NAME) $(OBJS) $(LINKER_FLAGS) 
 
 
 clean:

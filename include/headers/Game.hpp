@@ -23,6 +23,7 @@ private:
     int h; int grid_h;
 
     double delta_t = 0.3;
+    double o = 1.9; // overrelaxation
 
     bool is_running = true;   
     SDL_Window* window = nullptr;
