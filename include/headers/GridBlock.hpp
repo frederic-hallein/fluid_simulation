@@ -6,7 +6,7 @@ class GridBlock {
 public:
     GridBlock(SDL_Renderer* renderer, int grid_size, int x_pos, int y_pos);
     ~GridBlock();
-
+    
     int get_x_pos();
     int get_y_pos();
 
@@ -19,6 +19,8 @@ public:
 
     void set_p(double p);
     double get_p();
+
+    void set_rho(double rho);
     double get_rho();
 
     void draw();
@@ -37,6 +39,6 @@ private:
     int s = 1;
 
     double p = 0.0;
-    double rho;
+    double rho = 0.0;
 
 };

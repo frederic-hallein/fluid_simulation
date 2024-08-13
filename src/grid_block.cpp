@@ -32,12 +32,14 @@ void GridBlock::set_p(double p) {this->p=p;}
 
 double GridBlock::get_p() {return p;}
 
+void GridBlock::set_rho(double rho) {this->rho=rho;}
+
 double GridBlock::get_rho() {return rho;}
 
 void GridBlock::draw()
 {
-    rect.x = (x_pos - 1) * grid_size;
-    rect.y = (y_pos - 1) * grid_size;
+    rect.x = x_pos * grid_size;
+    rect.y = y_pos * grid_size;
     rect.w = grid_size;
     rect.h = grid_size;
     SDL_RenderFillRect(renderer, &rect);

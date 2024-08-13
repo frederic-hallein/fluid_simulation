@@ -6,7 +6,7 @@
 #include "Game.hpp"
 
 
-const int GRAV_ACC = 9.81;
+const double GRAV_ACC = 9.81;
 
 Game::Game() {}
 
@@ -18,7 +18,7 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::cout << "SDL_Init has failed." << '\n';
-        std::cout << "Error:" << SDL_GetError() << '\n'; 
+        std::cout << "Error: " << SDL_GetError() << '\n'; 
     }
 
     window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -38,28 +38,28 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
     // keep hold of SCREEN_WIDTH and SCREEN_HEIGHT
     this->w = SCREEN_WIDTH; 
     this->h = SCREEN_HEIGHT;
-    
-    this->grid_w = SCREEN_WIDTH / grid_size;
-    this->grid_h = SCREEN_HEIGHT / grid_size;
+
+    this->grid_w = w / grid_size;
+    this->grid_h = h / grid_size;
 
     // initialize grid blocks
-    for (int i = 0; i <= grid_w + 2; i++)
+    for (int i = 0; i <= grid_w; i++)
     {    
-        for (int j = 0; j <= grid_h + 2; j++)
+        for (int j = 0; j <= grid_h; j++)
         {
             GridBlock grid_block(renderer, grid_size, i, j);
             grid_blocks.push_back(std::vector<GridBlock>());
             grid_blocks[i].push_back(grid_block);
 
             // set window border cells
-            if (i < 1 || j < 1)
+            if (i == 0 || j == 0)
             {
                 grid_blocks[i][j].set_wall();
                 //std::cout << i << ',' << j << '\n';
 
             }
 
-            if (i > grid_w + 1 || j > grid_h + 1)
+            if (i == grid_w - 1 || j == grid_h - 1)
             {
                 grid_blocks[i][j].set_wall();
                 //std::cout << i << ',' << j << '\n';
@@ -93,9 +93,9 @@ void Game::handleEvents()
 void Game::update()
 {
     
-    for (int i = 1; i <= grid_w; i++)
+    for (int i = 1; i <= grid_w - 2; i++)
     {
-        for (int j = 1; j <= grid_h; j++)
+        for (int j = 1; j <= grid_h - 2; j++)
         {
             double v       = grid_blocks[i][j].get_v();
             double v_up    = grid_blocks[i][j-1].get_v();
@@ -115,16 +115,12 @@ void Game::update()
             int s_down  = grid_blocks[i][j+1].get_s();
             int s_left  = grid_blocks[i-1][j].get_s();
 
-
-            //std::cout << "pos: " << i << ',' << j << " : " << s << ',' << s_up << ',' << s_right << ',' << s_down << ',' << s_left;
-            
             // gravity 
             v += delta_t * GRAV_ACC;
 
             // incompressibility
-            double d = o * (u_right - u + v_down - v);
+            double d = o * (u_right - u - v_up + v); // divergence
             int total_s = s_right + s_left + s_down + s_up;
-            //std::cout << "pos:" << i << ',' << j << d << ',' << total_s << ':' << s_right << ',' << s_left << ',' << s_down << ',' << s_up  << '\n';
 
             //pressure
             double p = grid_blocks[i][j].get_p();
@@ -133,18 +129,19 @@ void Game::update()
             double rho = grid_blocks[i][j].get_rho();
 
 
+            //std::cout << "pos:" << i << ',' << j << '|' << d << ',' << total_s << '|' << s_right << ',' << s_left << ',' << s_down << ',' << s_up  << '\n';
             try
             {
                 if (total_s == 0) 
                 {
-                    std::string error = std::format("Division by zero in grid block: {}, {}", i, j);
-                    throw std::runtime_error(error); 
+                    std::string error_message = std::format("Division by zero in grid block: {}, {}", i, j);
+                    throw std::runtime_error(error_message); 
                 }
 
                 u       += d * (s_left  / total_s);
                 u_right -= d * (s_right / total_s);
-                v       += d * (s_up    / total_s);
-                v_down  -= d * (s_down  / total_s);
+                v       += d * (s_up    / total_s); // + (or -)
+                v_down  -= d * (s_down  / total_s); // - (or +)
                 
                 p += (d/s) * (rho * grid_size / delta_t);
 
@@ -153,14 +150,14 @@ void Game::update()
                 grid_blocks[i+1][j].set_velocity(v_right, u_right);
                 grid_blocks[i][j+1].set_velocity(v_down, u_down);
 
+
                 // update pressure
                 grid_blocks[i][j].set_p(p);
+
+                //std::cout << grid_blocks[1][15].get_u() << ", " << grid_blocks[1][15].get_v() << ", " << grid_blocks[1][15].get_p() << ", " << grid_blocks[1][15].get_rho()   << '\n';
             }
 
-            catch (const std::exception& e)
-            {
-                std::cout << "Exception " << e.what() << '\n';
-            }
+            catch (const std::exception& e) {std::cout << "Exception: " << e.what() << '\n';}
 
             
         }
@@ -171,7 +168,7 @@ void Game::update()
 
 void Game::render()
 {
-    int grid_color[3] = {255, 255, 255};
+    int grid_color[3] = {255, 255, 255}; //white
 
 
     // draw grid
@@ -190,14 +187,23 @@ void Game::render()
     }
 
     //color squares
-    for (int i = 1; i <= grid_w; i++)
+    for (int i = 0; i <= grid_w; i++)
     {
         //std::cout << i << '\n';
-        for (int j = 10; j <= 15; j++)
+        for (int j = 0; j <= grid_h; j++)
         {
-            grid_blocks[i][j].draw();
+            //grid_blocks[i][j].set_rho(1.0);
+
+            //draw window border
+            if (!grid_blocks[i][j].get_s())
+            {
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                grid_blocks[i][j].draw();
+
+            }
         }
     }
+    
     //grid_blocks[1][1].draw();
     //grid_blocks[2][10].draw();
     //grid_blocks[8][8].draw();
