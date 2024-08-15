@@ -14,9 +14,9 @@ double GridBlock::get_x_pos() {return x_pos;}
 
 double GridBlock::get_y_pos() {return y_pos;}
 
-void GridBlock::set_v(double v) {this->v= v;}
+void GridBlock::set_v(double v) {this->v = v;}
 
-void GridBlock::set_u(double u) {this->u= u;}
+void GridBlock::set_u(double u) {this->u = u;}
 
 double GridBlock::get_v() {return v;}
 

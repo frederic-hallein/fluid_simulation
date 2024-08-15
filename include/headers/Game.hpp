@@ -31,7 +31,7 @@ private:
     SDL_Renderer* renderer = nullptr;
     SDL_Event event;
 
-    int grid_size = 10;
+    int grid_size = 80;
     std::vector<std::vector<GridBlock>> grid_blocks;
 
 

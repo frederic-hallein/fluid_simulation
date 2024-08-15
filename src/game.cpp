@@ -130,13 +130,15 @@ void Game::update()
                 if (total_s == 0) {
                     std::string error_message = std::format("Division by zero in grid block: {}, {}", i, j);
                     throw std::runtime_error(error_message); 
-                    
+                    is_running = false;
                 }
                 
                 u       += d * (s_left  / total_s);
                 u_right -= d * (s_right / total_s);
                 v       += d * (s_up    / total_s); // + (or -)
                 v_down  -= d * (s_down  / total_s); // - (or +)
+
+                //std::cout << u << ", " << v << '\n';
 
                 // update velocity
                 grid_blocks[i][j].set_v(v);
@@ -159,8 +161,12 @@ void Game::update()
         }
     }
 
+    //std::cout << grid_blocks[10][10].get_u() << ", " << grid_blocks[10][10].get_v() << '\n';
+
+
 
     // advection
+    
     for (int i = 1; i <= grid_w - 2; i++) {
         for (int j = 1; j <= grid_h - 2; j++) {
 
@@ -191,8 +197,11 @@ void Game::update()
             double v_left_up = grid_blocks[i-1][j-1].get_v();
             double v_avg = (v + v_up + v_left + v_left_up) / 4;
 
+
+
             x -= delta_t * u;
             y -= delta_t * v_avg;
+
 
             double u_right_up = grid_blocks[i+1][j-1].get_u();
 
@@ -218,24 +227,25 @@ void Game::update()
             y -= delta_t * v;
 
             double v_right_up = grid_blocks[i+1][j-1].get_v();
-
-            w_00 = 1 - x / grid_size; 
-            w_10 = 1 - y / grid_size;
-            w_01 = x / grid_size;
-            w_11 = y / grid_size;
-
             double v_old = (w_00 * w_10) * v + (w_01 * w_10) * v_right + (w_01 * w_11) * v_up + (w_00 * w_11) * v_right_up;
 
 
             grid_blocks[i][j].set_v(v_old);
 
 
+            std::cout << '(' << i << ", " << j << "), (" << grid_blocks[i][j].get_x_pos() << ", " << grid_blocks[i][j].get_y_pos() << ')' << ": v = " << grid_blocks[i][j].get_v() << ", u = " << grid_blocks[i][j].get_u() << '\n';
+            if (std::isnan(grid_blocks[i][j].get_v()) || std::isnan(grid_blocks[i][j].get_u()))
+            {
+                is_running= false;
+            }
+
+
 
         }
     }
+    
 
 
-    std::cout << grid_blocks[10][10].get_u() << ", " << grid_blocks[10][10].get_v() << '\n';
     
     
 }
