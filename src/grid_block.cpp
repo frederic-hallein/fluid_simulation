@@ -1,6 +1,6 @@
 #include "GridBlock.hpp"
 
-GridBlock::GridBlock(SDL_Renderer* renderer, int grid_size, int x_pos, int y_pos) 
+GridBlock::GridBlock(SDL_Renderer* renderer, int grid_size, double x_pos, double y_pos) 
 {
     this->renderer = renderer;
     this->grid_size = grid_size;
@@ -10,21 +10,19 @@ GridBlock::GridBlock(SDL_Renderer* renderer, int grid_size, int x_pos, int y_pos
 
 GridBlock::~GridBlock() {}
 
-int GridBlock::get_x_pos() {return x_pos;}
+double GridBlock::get_x_pos() {return x_pos;}
 
-int GridBlock::get_y_pos() {return y_pos;}
+double GridBlock::get_y_pos() {return y_pos;}
 
-void GridBlock::set_velocity(double v, double u)
-{
-    this->v= v;
-    this->u= u;
-}
+void GridBlock::set_v(double v) {this->v= v;}
+
+void GridBlock::set_u(double u) {this->u= u;}
 
 double GridBlock::get_v() {return v;}
 
 double GridBlock::get_u() {return u;}
 
-void GridBlock::set_wall() {this->s = 0;}
+void GridBlock::set_boundary() {this->s = 0;}
 
 int GridBlock::get_s() {return s;}
 
@@ -38,8 +36,8 @@ double GridBlock::get_rho() {return rho;}
 
 void GridBlock::draw()
 {
-    rect.x = x_pos * grid_size;
-    rect.y = y_pos * grid_size;
+    rect.x = x_pos;
+    rect.y = y_pos;
     rect.w = grid_size;
     rect.h = grid_size;
     SDL_RenderFillRect(renderer, &rect);

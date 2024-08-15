@@ -18,6 +18,7 @@ public:
     void clean();
     bool running();
 
+
 private:
     int w; int grid_w;
     int h; int grid_h;
