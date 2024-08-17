@@ -22,7 +22,12 @@ double GridBlock::get_v() {return v;}
 
 double GridBlock::get_u() {return u;}
 
-void GridBlock::set_boundary() {this->s = 0;}
+void GridBlock::set_boundary() 
+{
+    this->s = 0;
+    this->u = 0.0;
+    this->v = 0.0;
+}
 
 int GridBlock::get_s() {return s;}
 

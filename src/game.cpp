@@ -101,7 +101,25 @@ void Game::update()
             grid_blocks[i][j].set_v(v);
         }
     }
- 
+    /*
+    double v;
+    double v_up;
+    double v_right;
+    double v_down;
+    double v_left;
+
+    double u;
+    double u_up;
+    double u_right;
+    double u_down;
+    double u_left;
+
+    int s;
+    int s_up;
+    int s_right;
+    int s_down;
+    int s_left;
+    */
     // incompressibility
     for (int i = 1; i <= grid_w - 2; i++) {
         for (int j = 1; j <= grid_h - 2; j++) {
@@ -123,8 +141,10 @@ void Game::update()
             int s_down  = grid_blocks[i][j+1].get_s();
             int s_left  = grid_blocks[i-1][j].get_s();
 
+            double d = o * (u_right - u + v_down - v); // divergence
             int total_s = s_right + s_left + s_down + s_up;
-            double d = o * (u_right - u + v_up - v); // divergence
+
+            //std::cout << "d = " << d << ", " << "s = " << total_s <<  '\n';
             try {
 
                 if (total_s == 0) {
@@ -133,20 +153,24 @@ void Game::update()
                     is_running = false;
                 }
                 
-                u       += d * (s_left  / total_s);
-                u_right -= d * (s_right / total_s);
-                v       += d * (s_up    / total_s); // + (or -)
-                v_down  -= d * (s_down  / total_s); // - (or +)
+                u       += d * (s_left  / (double)total_s);
+                u_right -= d * (s_right / (double)total_s);
+                v       += d * (s_up    / (double)total_s); // + (or -)
+                v_down  -= d * (s_down  / (double)total_s); // - (or +)
 
-                //std::cout << u << ", " << v << '\n';
 
                 // update velocity
-                grid_blocks[i][j].set_v(v);
                 grid_blocks[i][j].set_u(u);
                 grid_blocks[i+1][j].set_u(u_right);
+                grid_blocks[i][j].set_v(v);
                 grid_blocks[i][j+1].set_v(v_down);
 
-
+                if (i == 1 && j == 3){
+                std::cout << "(" << i << ", " << j << ") " << "u = " << u << ", " << "u_right = " << u_right << ", " << "v = " << v << ", " << "v_down = " << v_down << ", " << "d = " << d << ", " << "s = " << total_s << '\n';
+                }
+                if (i == 2 && j == 3){
+                std::cout << "(" << i << ", " << j << ") " << "u = " << u << ", " << "u_right = " << u_right << ", " << "v = " << v << ", " << "v_down = " << v_down << ", " << "d = " << d << ", " << "s = " << total_s << '\n';
+                }
                 // update pressure
                 double rho = grid_blocks[i][j].get_rho();
                 double p = grid_blocks[i][j].get_p();
@@ -161,12 +185,68 @@ void Game::update()
         }
     }
 
-    //std::cout << grid_blocks[10][10].get_u() << ", " << grid_blocks[10][10].get_v() << '\n';
+    double x;
+    double y;
 
-
+    double w_00;
+    double w_10;
+    double w_01;
+    double w_11;
 
     // advection
     
+    for (int i = 1; i <= grid_w - 2; i++) {
+        for (int j = 1; j <= grid_h - 2; j++) {
+
+            double v       = grid_blocks[i][j].get_v();
+            double v_up    = grid_blocks[i][j-1].get_v();
+            double v_right = grid_blocks[i+1][j].get_v();
+            double v_down  = grid_blocks[i][j+1].get_v();
+            double v_left  = grid_blocks[i-1][j].get_v();
+
+            double u       = grid_blocks[i][j].get_u();
+            double u_up    = grid_blocks[i][j-1].get_u();
+            double u_right = grid_blocks[i+1][j].get_u();
+            double u_down  = grid_blocks[i][j+1].get_u();
+            double u_left  = grid_blocks[i-1][j].get_u();
+
+            x;
+            y;
+
+            w_00;
+            w_10;
+            w_01;
+            w_11;
+
+            // u component
+            x = grid_blocks[i][j].get_x_pos();
+            y = grid_blocks[i][j].get_y_pos() + grid_size / 2;
+
+            double v_left_down = grid_blocks[i-1][j+1].get_v();
+            double v_avg = (v_down + v + v_left_down + v_left) / 4;
+
+
+            x -= delta_t * u;
+            y -= delta_t * v_avg;
+
+
+            w_00 = 1 - x / grid_size; 
+            w_10 = 1 - y / grid_size;
+            w_01 = x / grid_size;
+            w_11 = y / grid_size;
+
+            double u_right_up = grid_blocks[i+1][j-1].get_u();
+            double u_old = (w_00 * w_10) * u + (w_01 * w_10) * u_right + (w_01 * w_11) * u_up + (w_00 * w_11) * u_right_up;
+
+
+            grid_blocks[i][j].set_u(u_old);
+
+
+
+
+        }
+    }
+
     for (int i = 1; i <= grid_w - 2; i++) {
         for (int j = 1; j <= grid_h - 2; j++) {
 
@@ -190,56 +270,42 @@ void Game::update()
             double w_01;
             double w_11;
 
-            // u component
-            x = grid_blocks[i][j].get_x_pos();
-            y = grid_blocks[i][j].get_y_pos() + grid_size / 2;
 
-            double v_left_up = grid_blocks[i-1][j-1].get_v();
-            double v_avg = (v + v_up + v_left + v_left_up) / 4;
-
-
-
-            x -= delta_t * u;
-            y -= delta_t * v_avg;
-
+            // v component
+            x = grid_blocks[i][j].get_x_pos() + grid_size / 2;
+            y = grid_blocks[i][j].get_y_pos();
 
             double u_right_up = grid_blocks[i+1][j-1].get_u();
+            double u_avg = (u_right + u_right_up + u + u_up) / 4;
+
+            x -= delta_t * u_avg;
+            y -= delta_t * v;
 
             w_00 = 1 - x / grid_size; 
             w_10 = 1 - y / grid_size;
             w_01 = x / grid_size;
             w_11 = y / grid_size;
 
-            double u_old = (w_00 * w_10) * u + (w_01 * w_10) * u_right + (w_01 * w_11) * u_up + (w_00 * w_11) * u_right_up;
-
-
-            grid_blocks[i][j].set_u(u_old);
-
-
-            // v component
-            x = grid_blocks[i][j].get_x_pos() + grid_size / 2;
-            y = grid_blocks[i][j].get_y_pos() + grid_size;
-
-            double u_right_down = grid_blocks[i+1][j+1].get_u();
-            double u_avg = (u + u_down + u_right + u_right_down) / 4;
-
-            x -= delta_t * u_avg;
-            y -= delta_t * v;
-
             double v_right_up = grid_blocks[i+1][j-1].get_v();
             double v_old = (w_00 * w_10) * v + (w_01 * w_10) * v_right + (w_01 * w_11) * v_up + (w_00 * w_11) * v_right_up;
 
 
-            grid_blocks[i][j].set_v(v_old);
+            //grid_blocks[i][j].set_v(v_old);
 
 
-            std::cout << '(' << i << ", " << j << "), (" << grid_blocks[i][j].get_x_pos() << ", " << grid_blocks[i][j].get_y_pos() << ')' << ": v = " << grid_blocks[i][j].get_v() << ", u = " << grid_blocks[i][j].get_u() << '\n';
+ 
+
+
+        }
+    }
+
+    for (int i = 1; i <= grid_w - 2; i++) {
+        for (int j = 1; j <= grid_h - 2; j++) {
+            //std::cout << '(' << i << ", " << j << "), (" << grid_blocks[i][j].get_x_pos() << ", " << grid_blocks[i][j].get_y_pos() << ')' << ": v = " << grid_blocks[i][j].get_v() << ", u = " << grid_blocks[i][j].get_u() << '\n';
             if (std::isnan(grid_blocks[i][j].get_v()) || std::isnan(grid_blocks[i][j].get_u()))
             {
                 is_running= false;
             }
-
-
 
         }
     }
