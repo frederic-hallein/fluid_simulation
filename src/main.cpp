@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
         timer.stop();
         timer.delayFrame();
-        break;
+        
     }
 
     game.clean();
