@@ -20,19 +20,25 @@ public:
 
 
 private:
-    int w; int grid_w;
-    int h; int grid_h;
+    int grid_width;
+    int grid_height;
 
-    double delta_t = 0.3;
-    double o = 1.9; // overrelaxation
+
+    int dx = 80; 
+    float dt = 1.0;
+
+    float tau = 1.5;
+    float c_s;
+    float nu;
+    
 
     bool is_running = true;   
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     SDL_Event event;
 
-    int grid_size = 80;
     std::vector<std::vector<GridBlock>> grid_blocks;
+    std::vector<std::vector<GridBlock>> grid_blocks_tmp;
 
 
 };

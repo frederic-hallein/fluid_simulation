@@ -1,12 +1,11 @@
 #include <iostream>
 #include <format>
-#include <stdexcept>
+#include <cmath>
 
 
 #include "Game.hpp"
 
 
-const double GRAV_ACC = 9.81;
 
 Game::Game() {}
 
@@ -36,43 +35,82 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
     }
 
     // keep hold of SCREEN_WIDTH and SCREEN_HEIGHT
-    this->w = SCREEN_WIDTH; 
-    this->h = SCREEN_HEIGHT;
+    this->grid_width = SCREEN_WIDTH / dx;
+    this->grid_height = SCREEN_HEIGHT / dx;
 
-    this->grid_w = w / grid_size;
-    this->grid_h = h / grid_size;
+
+    // set viscosity and speed of sound
+    this->c_s = 0.57735026919 * (dx / dt);
+    this->nu = c_s * c_s * (tau - dt / 2);
+ 
+
 
     // initialize grid blocks
-    for (int i = 0; i <= grid_w; i++)
-    {    
-        for (int j = 0; j <= grid_h; j++)
-        {
-            GridBlock grid_block(renderer, grid_size, i * grid_size, j * grid_size);
+    for (int i = 0; i <= grid_width; i++) {    
+        for (int j = 0; j <= grid_height; j++) {
+
+            GridBlock grid_block(renderer, dx, dt, i * dx, j * dx);
             grid_blocks.push_back(std::vector<GridBlock>());
             grid_blocks[i].push_back(grid_block);
 
-            // set window border cells
-            if (i == 0 || j == 0)
-            {
+            GridBlock grid_block_tmp(renderer, dx, dt, i * dx, j * dx);
+            grid_blocks_tmp.push_back(std::vector<GridBlock>());
+            grid_blocks_tmp[i].push_back(grid_block_tmp);
+            
+            // set window border 
+            if (i == 0 || j == 0 || i == grid_width - 1 || j == grid_height - 1) {
                 grid_blocks[i][j].set_boundary();
-                //std::cout << i << ',' << j << '\n';
+                grid_blocks_tmp[i][j].set_boundary();
+            } 
 
-            }
-
-            if (i == grid_w - 1 || j == grid_h - 1)
-            {
-                grid_blocks[i][j].set_boundary();
-                //std::cout << i << ',' << j << '\n';
-   
-            }
             
         }
-    }
+    }   
+
+    // initialize fi's
+    for (int i = 0; i <= grid_width; i++) {    
+        for (int j = 0; j <= grid_height; j++) {
+
+            std::vector<float>  f;
+            bool is_wall = grid_blocks[i][j].is_boundary();
+            
+            //if (!is_wall) {f = { 0,1,1,1,1,1,1,1,1 };}
+            //else {f = { 0,0,0,0,0,0,0,0,0 };}
+
+            if (i == 1 && j == 1) {f = { 1,1,1,1,1,1,1,1,1 };}
+            else {f = { 0,0,0,0,0,0,0,0,0 };}
+
+            grid_blocks[i][j].set_grid_velocity();
+
+            grid_blocks[i][j].set_f0(f[0]);
+            grid_blocks[i][j].set_f1(f[1]);
+            grid_blocks[i][j].set_f2(f[2]);
+            grid_blocks[i][j].set_f3(f[3]);
+            grid_blocks[i][j].set_f4(f[4]);
+            grid_blocks[i][j].set_f5(f[5]);
+            grid_blocks[i][j].set_f6(f[6]);
+            grid_blocks[i][j].set_f7(f[7]);
+            grid_blocks[i][j].set_f8(f[8]);
+
+            
+        }
+    }  
 
 
-
-    //std::cout << grid_blocks[0].size() << '\n'; // 80
-    //std::cout << grid_blocks.size() / grid_blocks[0].size() << '\n'; // 40
+    
+    int x = 1; int y = 1;
+    std::cout << "f0  = " << grid_blocks[x][y].get_f0() << ", f0_eq = " << grid_blocks[x][y].get_f0_eq()  << '\n'; 
+    std::cout << "f1  = " << grid_blocks[x][y].get_f1() << ", f1_eq = " << grid_blocks[x][y].get_f1_eq()  <<'\n';
+    std::cout << "f2  = " << grid_blocks[x][y].get_f2() << ", f2_eq = " << grid_blocks[x][y].get_f2_eq()  <<'\n';
+    std::cout << "f3  = " << grid_blocks[x][y].get_f3() << ", f3_eq = " << grid_blocks[x][y].get_f3_eq()  <<'\n';
+    std::cout << "f4  = " << grid_blocks[x][y].get_f4() << ", f4_eq = " << grid_blocks[x][y].get_f4_eq()  <<'\n';
+    std::cout << "f5  = " << grid_blocks[x][y].get_f5() << ", f5_eq = " << grid_blocks[x][y].get_f5_eq()  <<'\n';
+    std::cout << "f6  = " << grid_blocks[x][y].get_f6() << ", f6_eq = " << grid_blocks[x][y].get_f6_eq()  <<'\n';
+    std::cout << "f7  = " << grid_blocks[x][y].get_f7() << ", f7_eq = " << grid_blocks[x][y].get_f7_eq()  <<'\n';
+    std::cout << "f8  = " << grid_blocks[x][y].get_f8() << ", f8_eq = " << grid_blocks[x][y].get_f8_eq()  <<'\n';
+    
+    std::cout << "rho = " << grid_blocks[x][y].get_rho()  << ", u = (" << grid_blocks[x][y].get_u()[0] << ", " << grid_blocks[x][y].get_u()[1] << ")" <<'\n';
+    
 
 }
 
@@ -93,264 +131,193 @@ void Game::handleEvents()
 void Game::update()
 {
 
-    // gravity
-    for (int i = 1; i <= grid_w - 2; i++) {
-        for (int j = 1; j <= grid_h - 2; j++) {
-            double v = grid_blocks[i][j].get_v();
-            v += delta_t * GRAV_ACC;
-            grid_blocks[i][j].set_v(v);
+    for (int i = 1; i <= grid_width - 2; i++) {    
+        for (int j = 1; j <= grid_height - 2; j++) {
+
+            float f0 = grid_blocks[i][j].get_f0(); 
+            float f1 = grid_blocks[i][j].get_f1(); 
+            float f2 = grid_blocks[i][j].get_f2(); 
+            float f3 = grid_blocks[i][j].get_f3(); 
+            float f4 = grid_blocks[i][j].get_f4(); 
+            float f5 = grid_blocks[i][j].get_f5(); 
+            float f6 = grid_blocks[i][j].get_f6(); 
+            float f7 = grid_blocks[i][j].get_f7(); 
+            float f8 = grid_blocks[i][j].get_f8(); 
+
+            std::vector<float> f = { f0, f1, f2, f3, f4, f5, f6, f7, f8 };
+            grid_blocks[i][j].set_rho(f);
+            grid_blocks[i][j].set_u(f);
+
+            grid_blocks[i][j].set_f0_eq(c_s);
+            grid_blocks[i][j].set_f1_eq(c_s);
+            grid_blocks[i][j].set_f2_eq(c_s);
+            grid_blocks[i][j].set_f3_eq(c_s);
+            grid_blocks[i][j].set_f4_eq(c_s);
+            grid_blocks[i][j].set_f5_eq(c_s);
+            grid_blocks[i][j].set_f6_eq(c_s);
+            grid_blocks[i][j].set_f7_eq(c_s);
+            grid_blocks[i][j].set_f8_eq(c_s);
+
+            float f0_eq = grid_blocks[i][j].get_f0_eq();
+            float f1_eq = grid_blocks[i][j].get_f1_eq();
+            float f2_eq = grid_blocks[i][j].get_f2_eq();
+            float f3_eq = grid_blocks[i][j].get_f3_eq();
+            float f4_eq = grid_blocks[i][j].get_f4_eq();
+            float f5_eq = grid_blocks[i][j].get_f5_eq();
+            float f6_eq = grid_blocks[i][j].get_f6_eq();
+            float f7_eq = grid_blocks[i][j].get_f7_eq();
+            float f8_eq = grid_blocks[i][j].get_f8_eq();
+
+            // collision step 
+            float f0_tmp = f0 - (dt / tau) * (f0 - f0_eq);
+            float f1_tmp = f1 - (dt / tau) * (f1 - f1_eq);
+            float f2_tmp = f2 - (dt / tau) * (f2 - f2_eq);
+            float f3_tmp = f3 - (dt / tau) * (f3 - f3_eq);
+            float f4_tmp = f4 - (dt / tau) * (f4 - f4_eq);
+            float f5_tmp = f5 - (dt / tau) * (f5 - f5_eq);
+            float f6_tmp = f6 - (dt / tau) * (f6 - f6_eq);
+            float f7_tmp = f7 - (dt / tau) * (f7 - f7_eq);
+            float f8_tmp = f8 - (dt / tau) * (f8 - f8_eq);
+
+            std::vector<float> f_tmp = { f0_tmp, f1_tmp, f2_tmp, f3_tmp, f4_tmp, f5_tmp, f6_tmp, f7_tmp, f8_tmp }; 
+            grid_blocks_tmp[i][j].set_f0(f_tmp[0]);
+            grid_blocks_tmp[i][j].set_f1(f_tmp[1]);
+            grid_blocks_tmp[i][j].set_f2(f_tmp[2]);
+            grid_blocks_tmp[i][j].set_f3(f_tmp[3]);
+            grid_blocks_tmp[i][j].set_f4(f_tmp[4]);
+            grid_blocks_tmp[i][j].set_f5(f_tmp[5]);
+            grid_blocks_tmp[i][j].set_f6(f_tmp[6]);
+            grid_blocks_tmp[i][j].set_f7(f_tmp[7]);
+            grid_blocks_tmp[i][j].set_f8(f_tmp[8]);
+            
         }
     }
-    /*
-    double v;
-    double v_up;
-    double v_right;
-    double v_down;
-    double v_left;
 
-    double u;
-    double u_up;
-    double u_right;
-    double u_down;
-    double u_left;
-
-    int s;
-    int s_up;
-    int s_right;
-    int s_down;
-    int s_left;
-    */
-    // incompressibility
-    for (int i = 1; i <= grid_w - 2; i++) {
-        for (int j = 1; j <= grid_h - 2; j++) {
-            double v       = grid_blocks[i][j].get_v();
-            double v_up    = grid_blocks[i][j-1].get_v();
-            double v_right = grid_blocks[i+1][j].get_v();
-            double v_down  = grid_blocks[i][j+1].get_v();
-            double v_left  = grid_blocks[i-1][j].get_v();
-
-            double u       = grid_blocks[i][j].get_u();
-            double u_up    = grid_blocks[i][j-1].get_u();
-            double u_right = grid_blocks[i+1][j].get_u();
-            double u_down  = grid_blocks[i][j+1].get_u();
-            double u_left  = grid_blocks[i-1][j].get_u();
+    for (int i = 1; i <= grid_width - 2; i++) {    
+        for (int j = 1; j <= grid_height - 2; j++) {
             
-            int s       = grid_blocks[i][j].get_s();
-            int s_up    = grid_blocks[i][j-1].get_s();
-            int s_right = grid_blocks[i+1][j].get_s();
-            int s_down  = grid_blocks[i][j+1].get_s();
-            int s_left  = grid_blocks[i-1][j].get_s();
+            std::vector<float> c0 = grid_blocks[i][j].get_c0();
+            std::vector<float> c1 = grid_blocks[i][j].get_c1();
+            std::vector<float> c2 = grid_blocks[i][j].get_c2();
+            std::vector<float> c3 = grid_blocks[i][j].get_c3();
+            std::vector<float> c4 = grid_blocks[i][j].get_c4();
+            std::vector<float> c5 = grid_blocks[i][j].get_c5();
+            std::vector<float> c6 = grid_blocks[i][j].get_c6();
+            std::vector<float> c7 = grid_blocks[i][j].get_c7();
+            std::vector<float> c8 = grid_blocks[i][j].get_c8();
+            
+            float f0_tmp = grid_blocks_tmp[i][j].get_f0();
+            float f1_tmp = grid_blocks_tmp[i][j].get_f1();
+            float f2_tmp = grid_blocks_tmp[i][j].get_f2();
+            float f3_tmp = grid_blocks_tmp[i][j].get_f3();
+            float f4_tmp = grid_blocks_tmp[i][j].get_f4();
+            float f5_tmp = grid_blocks_tmp[i][j].get_f5();
+            float f6_tmp = grid_blocks_tmp[i][j].get_f6();
+            float f7_tmp = grid_blocks_tmp[i][j].get_f7();
+            float f8_tmp = grid_blocks_tmp[i][j].get_f8();
+            
+            bool wall_0 = grid_blocks[(int)(i + c0[0] * dt) / dx][(int)(j + c0[1] * dt) / dx].is_boundary();
+            bool wall_1 = grid_blocks[(int)(i + c1[0] * dt) / dx][(int)(j + c1[1] * dt) / dx].is_boundary();
+            bool wall_2 = grid_blocks[(int)(i + c2[0] * dt) / dx][(int)(j + c2[1] * dt) / dx].is_boundary();
+            bool wall_3 = grid_blocks[(int)(i + c3[0] * dt) / dx][(int)(j + c3[1] * dt) / dx].is_boundary();
+            bool wall_4 = grid_blocks[(int)(i + c4[0] * dt) / dx][(int)(j + c4[1] * dt) / dx].is_boundary();
+            bool wall_5 = grid_blocks[(int)(i + c5[0] * dt) / dx][(int)(j + c5[1] * dt) / dx].is_boundary();
+            bool wall_6 = grid_blocks[(int)(i + c6[0] * dt) / dx][(int)(j + c6[1] * dt) / dx].is_boundary();
+            bool wall_7 = grid_blocks[(int)(i + c7[0] * dt) / dx][(int)(j + c7[1] * dt) / dx].is_boundary();
+            bool wall_8 = grid_blocks[(int)(i + c8[0] * dt) / dx][(int)(j + c8[1] * dt) / dx].is_boundary();
+            
+            // propagation step
+            if (!wall_0) {grid_blocks[(int)(i + c0[0] * dt) / dx][(int)(j + c0[1] * dt) / dx].set_f0(f0_tmp);}
+            else {grid_blocks[i][j].set_f0(f0_tmp);}  
 
-            double d = o * (u_right - u + v_down - v); // divergence
-            int total_s = s_right + s_left + s_down + s_up;
+            if (!wall_1) {grid_blocks[(int)(i + c1[0] * dt) / dx][(int)(j + c1[1] * dt) / dx].set_f1(f1_tmp);}
+            else {grid_blocks[i][j].set_f1(f3_tmp);}       
+            
+            if (!wall_2) {grid_blocks[(int)(i + c2[0] * dt) / dx][(int)(j + c2[1] * dt) / dx].set_f2(f2_tmp);}
+            else {grid_blocks[i][j].set_f2(f4_tmp);}  
 
-            //std::cout << "d = " << d << ", " << "s = " << total_s <<  '\n';
-            try {
+            if (!wall_3) {grid_blocks[(int)(i + c3[0] * dt) / dx][(int)(j + c3[1] * dt) / dx].set_f3(f3_tmp);}
+            else {grid_blocks[i][j].set_f3(f1_tmp);}  
 
-                if (total_s == 0) {
-                    std::string error_message = std::format("Division by zero in grid block: {}, {}", i, j);
-                    throw std::runtime_error(error_message); 
-                    is_running = false;
-                }
+            if (!wall_4) {grid_blocks[(int)(i + c4[0] * dt) / dx][(int)(j + c4[1] * dt) / dx].set_f4(f4_tmp);}
+            else {grid_blocks[i][j].set_f4(f2_tmp);}  
+
+            if (!wall_5) {grid_blocks[(int)(i + c5[0] * dt) / dx][(int)(j + c5[1] * dt) / dx].set_f5(f5_tmp);}
+            else {grid_blocks[i][j].set_f5(f7_tmp);}  
+
+            if (!wall_6) {grid_blocks[(int)(i + c6[0] * dt) / dx][(int)(j + c6[1] * dt) / dx].set_f6(f6_tmp);}
+            else {grid_blocks[i][j].set_f6(f8_tmp);}  
+
+            if (!wall_7) {grid_blocks[(int)(i + c7[0] * dt) / dx][(int)(j + c7[1] * dt) / dx].set_f7(f7_tmp);}
+            else {grid_blocks[i][j].set_f7(f5_tmp);}  
+
+            if (!wall_8) {grid_blocks[(int)(i + c8[0] * dt) / dx][(int)(j + c8[1] * dt) / dx].set_f8(f8_tmp);}
+            else {grid_blocks[i][j].set_f8(f6_tmp);}  
                 
-                u       += d * (s_left  / (double)total_s);
-                u_right -= d * (s_right / (double)total_s);
-                v       += d * (s_up    / (double)total_s); // + (or -)
-                v_down  -= d * (s_down  / (double)total_s); // - (or +)
-
-
-                // update velocity
-                grid_blocks[i][j].set_u(u);
-                grid_blocks[i+1][j].set_u(u_right);
-                grid_blocks[i][j].set_v(v);
-                grid_blocks[i][j+1].set_v(v_down);
-
-                if (i == 1 && j == 3){
-                std::cout << "(" << i << ", " << j << ") " << "u = " << u << ", " << "u_right = " << u_right << ", " << "v = " << v << ", " << "v_down = " << v_down << ", " << "d = " << d << ", " << "s = " << total_s << '\n';
-                }
-                if (i == 2 && j == 3){
-                std::cout << "(" << i << ", " << j << ") " << "u = " << u << ", " << "u_right = " << u_right << ", " << "v = " << v << ", " << "v_down = " << v_down << ", " << "d = " << d << ", " << "s = " << total_s << '\n';
-                }
-                // update pressure
-                double rho = grid_blocks[i][j].get_rho();
-                double p = grid_blocks[i][j].get_p();
-                p += (d/s) * (rho * grid_size / delta_t);
-                grid_blocks[i][j].set_p(p);
-
-
-
-            } catch (const std::exception& e) {std::cout << "Exception: " << e.what() << '\n';}
-
-            
+                
         }
     }
 
-    double x;
-    double y;
-
-    double w_00;
-    double w_10;
-    double w_01;
-    double w_11;
-
-    // advection
-    
-    for (int i = 1; i <= grid_w - 2; i++) {
-        for (int j = 1; j <= grid_h - 2; j++) {
-
-            double v       = grid_blocks[i][j].get_v();
-            double v_up    = grid_blocks[i][j-1].get_v();
-            double v_right = grid_blocks[i+1][j].get_v();
-            double v_down  = grid_blocks[i][j+1].get_v();
-            double v_left  = grid_blocks[i-1][j].get_v();
-
-            double u       = grid_blocks[i][j].get_u();
-            double u_up    = grid_blocks[i][j-1].get_u();
-            double u_right = grid_blocks[i+1][j].get_u();
-            double u_down  = grid_blocks[i][j+1].get_u();
-            double u_left  = grid_blocks[i-1][j].get_u();
-
-            x;
-            y;
-
-            w_00;
-            w_10;
-            w_01;
-            w_11;
-
-            // u component
-            x = grid_blocks[i][j].get_x_pos();
-            y = grid_blocks[i][j].get_y_pos() + grid_size / 2;
-
-            double v_left_down = grid_blocks[i-1][j+1].get_v();
-            double v_avg = (v_down + v + v_left_down + v_left) / 4;
-
-
-            x -= delta_t * u;
-            y -= delta_t * v_avg;
-
-
-            w_00 = 1 - x / grid_size; 
-            w_10 = 1 - y / grid_size;
-            w_01 = x / grid_size;
-            w_11 = y / grid_size;
-
-            double u_right_up = grid_blocks[i+1][j-1].get_u();
-            double u_old = (w_00 * w_10) * u + (w_01 * w_10) * u_right + (w_01 * w_11) * u_up + (w_00 * w_11) * u_right_up;
-
-
-            grid_blocks[i][j].set_u(u_old);
-
-
-
-
-        }
-    }
-
-    for (int i = 1; i <= grid_w - 2; i++) {
-        for (int j = 1; j <= grid_h - 2; j++) {
-
-            double v       = grid_blocks[i][j].get_v();
-            double v_up    = grid_blocks[i][j-1].get_v();
-            double v_right = grid_blocks[i+1][j].get_v();
-            double v_down  = grid_blocks[i][j+1].get_v();
-            double v_left  = grid_blocks[i-1][j].get_v();
-
-            double u       = grid_blocks[i][j].get_u();
-            double u_up    = grid_blocks[i][j-1].get_u();
-            double u_right = grid_blocks[i+1][j].get_u();
-            double u_down  = grid_blocks[i][j+1].get_u();
-            double u_left  = grid_blocks[i-1][j].get_u();
-
-            double x;
-            double y;
-
-            double w_00;
-            double w_10;
-            double w_01;
-            double w_11;
-
-
-            // v component
-            x = grid_blocks[i][j].get_x_pos() + grid_size / 2;
-            y = grid_blocks[i][j].get_y_pos();
-
-            double u_right_up = grid_blocks[i+1][j-1].get_u();
-            double u_avg = (u_right + u_right_up + u + u_up) / 4;
-
-            x -= delta_t * u_avg;
-            y -= delta_t * v;
-
-            w_00 = 1 - x / grid_size; 
-            w_10 = 1 - y / grid_size;
-            w_01 = x / grid_size;
-            w_11 = y / grid_size;
-
-            double v_right_up = grid_blocks[i+1][j-1].get_v();
-            double v_old = (w_00 * w_10) * v + (w_01 * w_10) * v_right + (w_01 * w_11) * v_up + (w_00 * w_11) * v_right_up;
-
-
-            //grid_blocks[i][j].set_v(v_old);
-
-
- 
-
-
-        }
-    }
-
-    for (int i = 1; i <= grid_w - 2; i++) {
-        for (int j = 1; j <= grid_h - 2; j++) {
-            //std::cout << '(' << i << ", " << j << "), (" << grid_blocks[i][j].get_x_pos() << ", " << grid_blocks[i][j].get_y_pos() << ')' << ": v = " << grid_blocks[i][j].get_v() << ", u = " << grid_blocks[i][j].get_u() << '\n';
-            if (std::isnan(grid_blocks[i][j].get_v()) || std::isnan(grid_blocks[i][j].get_u()))
-            {
-                is_running= false;
-            }
-
-        }
-    }
-    
-
 
     
+    int x = 1; int y = 1;
+    std::cout << "f0  = " << grid_blocks[x][y].get_f1() << ", f0_eq = " << grid_blocks[x][y].get_f1_eq()  << '\n'; 
+    std::cout << "f1  = " << grid_blocks[x][y].get_f1() << ", f1_eq = " << grid_blocks[x][y].get_f1_eq()  <<'\n';
+    std::cout << "f2  = " << grid_blocks[x][y].get_f2() << ", f2_eq = " << grid_blocks[x][y].get_f2_eq()  <<'\n';
+    std::cout << "f3  = " << grid_blocks[x][y].get_f3() << ", f3_eq = " << grid_blocks[x][y].get_f3_eq()  <<'\n';
+    std::cout << "f4  = " << grid_blocks[x][y].get_f4() << ", f4_eq = " << grid_blocks[x][y].get_f4_eq()  <<'\n';
+    std::cout << "f5  = " << grid_blocks[x][y].get_f5() << ", f5_eq = " << grid_blocks[x][y].get_f5_eq()  <<'\n';
+    std::cout << "f6  = " << grid_blocks[x][y].get_f6() << ", f6_eq = " << grid_blocks[x][y].get_f6_eq()  <<'\n';
+    std::cout << "f7  = " << grid_blocks[x][y].get_f7() << ", f7_eq = " << grid_blocks[x][y].get_f7_eq()  <<'\n';
+    std::cout << "f8  = " << grid_blocks[x][y].get_f8() << ", f8_eq = " << grid_blocks[x][y].get_f8_eq()  <<'\n';
     
+    std::cout << "rho = " << grid_blocks[x][y].get_rho()  << ", u = (" << grid_blocks[x][y].get_u()[0] << ", " << grid_blocks[x][y].get_u()[1] << ")" <<'\n';
+    
+
 }
 
 void Game::render()
 {
-    int grid_color[3] = {255, 255, 255}; //white
 
 
     // draw grid
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    for (int x = 0; x < w; x += grid_size)
+    for (int i = 0; i <= grid_width; i++) 
     {
-        SDL_SetRenderDrawColor(renderer, grid_color[0], grid_color[1], grid_color[2], 255);
-        SDL_RenderDrawLine(renderer, x, 0, x, h);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawLine(renderer, i * dx, 0, i * dx, grid_height * dx);
     }
 
-    for (int y = 0; y < h; y += grid_size)
+    for (int j = 0; j <= grid_height; j++) 
     {
-        SDL_SetRenderDrawColor(renderer, grid_color[0], grid_color[1], grid_color[2], 255);
-        SDL_RenderDrawLine(renderer, 0, y, w, y);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawLine(renderer, 0, j * dx, grid_width * dx, j * dx);
     }
 
     //color squares
-    for (int i = 0; i <= grid_w; i++)
+    for (int i = 0; i <= grid_width; i++)
     {
-        //std::cout << i << '\n';
-        for (int j = 0; j <= grid_h; j++)
+        for (int j = 0; j <= grid_height; j++)
         {
-            //grid_blocks[i][j].set_rho(1.0);
-
+            bool is_wall = grid_blocks[i][j].is_boundary();
             //draw window border
-            if (!grid_blocks[i][j].get_s())
+            if (!is_wall)
+            {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                std::vector<float> u_norm = grid_blocks[i][j].get_u_normalized();
+                //std::cout << u_norm[0] << ", " << u_norm[1] << '\n';
+                SDL_RenderDrawLine(renderer, i * dx + (dx / 2), j * dx + (dx / 2), i * dx + (dx / 2) + (10 * u_norm[0]), j * dx + (dx / 2) + (10 * u_norm[1]));
+                
+            }
+            else
             {
                 SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
                 grid_blocks[i][j].draw();
 
             }
+
+
         }
     }
     
