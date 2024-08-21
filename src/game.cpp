@@ -66,16 +66,29 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
             } 
 
             // draw disk
-            if ((i - grid_width / 4) * (i - grid_width / 4) + (j - grid_height / 2) * (j - grid_height / 2) < 200) {
+            //if ((i - grid_width / 4) * (i - grid_width / 4) + (j - grid_height / 2) * (j - grid_height / 2) < 90) {
+            //    grid_blocks[i][j].set_boundary();
+            //    grid_blocks_tmp[i][j].set_boundary();
+            //} 
+
+            // draw rectangle
+            if (i < grid_width / 4 + 5 && i > grid_width / 4 - 5 && j < grid_height / 2 - 1) {
                 grid_blocks[i][j].set_boundary();
                 grid_blocks_tmp[i][j].set_boundary();
             } 
 
-            // draw rectangle
-            //if (i < grid_width / 4 + 10 && i > grid_width / 4 - 10 && j < grid_height / 2 + 30 && j > grid_height / 2 - 30) {
-            //    grid_blocks[i][j].set_boundary();
-            //    grid_blocks_tmp[i][j].set_boundary();
-            //} 
+            if (i < grid_width / 4 + 5 && i > grid_width / 4 - 5 && j > grid_height / 2 + 1) {
+                grid_blocks[i][j].set_boundary();
+                grid_blocks_tmp[i][j].set_boundary();
+            } 
+            if (i < grid_width / 2 + 5 && i > grid_width / 2 - 5 && j > grid_height / 2 + 5) {
+                grid_blocks[i][j].set_boundary();
+                grid_blocks_tmp[i][j].set_boundary();
+            } 
+            if (i < grid_width * 0.75 + 5 && i > grid_width * 0.75 - 5 && j < grid_height / 2 + 5) {
+                grid_blocks[i][j].set_boundary();
+                grid_blocks_tmp[i][j].set_boundary();
+            } 
 
             
         }
@@ -91,7 +104,7 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
             //if (!is_wall) {f = { 0,1,1,1,1,1,1,1,1 };}
             //else {f = { 0,0,0,0,0,0,0,0,0 };}
 
-            if (i == 1 && j < grid_height / 2 + 10 && j > grid_height / 2 - 10) {f = { 0,1,0,0,0,0,0,0,0 };}
+            if (i == 1) {f = {  0,1,0,0,0,0,0,0,0  };}
             else {f = { 0,0,0,0,0,0,0,0,0 };}
 
             grid_blocks[i][j].set_grid_velocity();
@@ -144,19 +157,28 @@ void Game::handleEvents()
 
 void Game::update()
 {
+    float f0; float f0_eq; float f0_tmp;
+    float f1; float f1_eq; float f1_tmp;
+    float f2; float f2_eq; float f2_tmp;
+    float f3; float f3_eq; float f3_tmp;
+    float f4; float f4_eq; float f4_tmp;
+    float f5; float f5_eq; float f5_tmp;
+    float f6; float f6_eq; float f6_tmp;
+    float f7; float f7_eq; float f7_tmp;
+    float f8; float f8_eq; float f8_tmp;
 
     for (int i = 1; i <= grid_width - 2; i++) {    
         for (int j = 1; j <= grid_height - 2; j++) {
 
-            float f0 = grid_blocks[i][j].get_f0(); 
-            float f1 = grid_blocks[i][j].get_f1(); 
-            float f2 = grid_blocks[i][j].get_f2(); 
-            float f3 = grid_blocks[i][j].get_f3(); 
-            float f4 = grid_blocks[i][j].get_f4(); 
-            float f5 = grid_blocks[i][j].get_f5(); 
-            float f6 = grid_blocks[i][j].get_f6(); 
-            float f7 = grid_blocks[i][j].get_f7(); 
-            float f8 = grid_blocks[i][j].get_f8(); 
+            f0 = grid_blocks[i][j].get_f0(); 
+            f1 = grid_blocks[i][j].get_f1(); 
+            f2 = grid_blocks[i][j].get_f2(); 
+            f3 = grid_blocks[i][j].get_f3(); 
+            f4 = grid_blocks[i][j].get_f4(); 
+            f5 = grid_blocks[i][j].get_f5(); 
+            f6 = grid_blocks[i][j].get_f6(); 
+            f7 = grid_blocks[i][j].get_f7(); 
+            f8 = grid_blocks[i][j].get_f8(); 
 
             std::vector<float> f = { f0, f1, f2, f3, f4, f5, f6, f7, f8 };
             grid_blocks[i][j].set_rho(f);
@@ -172,26 +194,26 @@ void Game::update()
             grid_blocks[i][j].set_f7_eq(c_s);
             grid_blocks[i][j].set_f8_eq(c_s);
 
-            float f0_eq = grid_blocks[i][j].get_f0_eq();
-            float f1_eq = grid_blocks[i][j].get_f1_eq();
-            float f2_eq = grid_blocks[i][j].get_f2_eq();
-            float f3_eq = grid_blocks[i][j].get_f3_eq();
-            float f4_eq = grid_blocks[i][j].get_f4_eq();
-            float f5_eq = grid_blocks[i][j].get_f5_eq();
-            float f6_eq = grid_blocks[i][j].get_f6_eq();
-            float f7_eq = grid_blocks[i][j].get_f7_eq();
-            float f8_eq = grid_blocks[i][j].get_f8_eq();
+            f0_eq = grid_blocks[i][j].get_f0_eq();
+            f1_eq = grid_blocks[i][j].get_f1_eq();
+            f2_eq = grid_blocks[i][j].get_f2_eq();
+            f3_eq = grid_blocks[i][j].get_f3_eq();
+            f4_eq = grid_blocks[i][j].get_f4_eq();
+            f5_eq = grid_blocks[i][j].get_f5_eq();
+            f6_eq = grid_blocks[i][j].get_f6_eq();
+            f7_eq = grid_blocks[i][j].get_f7_eq();
+            f8_eq = grid_blocks[i][j].get_f8_eq();
 
             // collision step 
-            float f0_tmp = f0 - (dt / tau) * (f0 - f0_eq);
-            float f1_tmp = f1 - (dt / tau) * (f1 - f1_eq);
-            float f2_tmp = f2 - (dt / tau) * (f2 - f2_eq);
-            float f3_tmp = f3 - (dt / tau) * (f3 - f3_eq);
-            float f4_tmp = f4 - (dt / tau) * (f4 - f4_eq);
-            float f5_tmp = f5 - (dt / tau) * (f5 - f5_eq);
-            float f6_tmp = f6 - (dt / tau) * (f6 - f6_eq);
-            float f7_tmp = f7 - (dt / tau) * (f7 - f7_eq);
-            float f8_tmp = f8 - (dt / tau) * (f8 - f8_eq);
+            f0_tmp = f0 - (dt / tau) * (f0 - f0_eq);
+            f1_tmp = f1 - (dt / tau) * (f1 - f1_eq);
+            f2_tmp = f2 - (dt / tau) * (f2 - f2_eq);
+            f3_tmp = f3 - (dt / tau) * (f3 - f3_eq);
+            f4_tmp = f4 - (dt / tau) * (f4 - f4_eq);
+            f5_tmp = f5 - (dt / tau) * (f5 - f5_eq);
+            f6_tmp = f6 - (dt / tau) * (f6 - f6_eq);
+            f7_tmp = f7 - (dt / tau) * (f7 - f7_eq);
+            f8_tmp = f8 - (dt / tau) * (f8 - f8_eq);
 
             grid_blocks_tmp[i][j].set_f0(f0_tmp);
             grid_blocks_tmp[i][j].set_f1(f1_tmp);
@@ -206,43 +228,54 @@ void Game::update()
         }
     }
 
+    std::vector<float> c0; bool wall_0;
+    std::vector<float> c1; bool wall_1;
+    std::vector<float> c2; bool wall_2;
+    std::vector<float> c3; bool wall_3;
+    std::vector<float> c4; bool wall_4;
+    std::vector<float> c5; bool wall_5;
+    std::vector<float> c6; bool wall_6;
+    std::vector<float> c7; bool wall_7;
+    std::vector<float> c8; bool wall_8;
+
     for (int i = 1; i <= grid_width - 2; i++) {    
         for (int j = 1; j <= grid_height - 2; j++) {
             
-            std::vector<float> c0 = grid_blocks[i][j].get_c0();
-            std::vector<float> c1 = grid_blocks[i][j].get_c1();
-            std::vector<float> c2 = grid_blocks[i][j].get_c2();
-            std::vector<float> c3 = grid_blocks[i][j].get_c3();
-            std::vector<float> c4 = grid_blocks[i][j].get_c4();
-            std::vector<float> c5 = grid_blocks[i][j].get_c5();
-            std::vector<float> c6 = grid_blocks[i][j].get_c6();
-            std::vector<float> c7 = grid_blocks[i][j].get_c7();
-            std::vector<float> c8 = grid_blocks[i][j].get_c8();
+            c0 = grid_blocks[i][j].get_c0();
+            c1 = grid_blocks[i][j].get_c1();
+            c2 = grid_blocks[i][j].get_c2();
+            c3 = grid_blocks[i][j].get_c3();
+            c4 = grid_blocks[i][j].get_c4();
+            c5 = grid_blocks[i][j].get_c5();
+            c6 = grid_blocks[i][j].get_c6();
+            c7 = grid_blocks[i][j].get_c7();
+            c8 = grid_blocks[i][j].get_c8();
             
-            float f0_tmp = grid_blocks_tmp[i][j].get_f0();
-            float f1_tmp = grid_blocks_tmp[i][j].get_f1();
-            float f2_tmp = grid_blocks_tmp[i][j].get_f2();
-            float f3_tmp = grid_blocks_tmp[i][j].get_f3();
-            float f4_tmp = grid_blocks_tmp[i][j].get_f4();
-            float f5_tmp = grid_blocks_tmp[i][j].get_f5();
-            float f6_tmp = grid_blocks_tmp[i][j].get_f6();
-            float f7_tmp = grid_blocks_tmp[i][j].get_f7();
-            float f8_tmp = grid_blocks_tmp[i][j].get_f8();
+            f0_tmp = grid_blocks_tmp[i][j].get_f0();
+            f1_tmp = grid_blocks_tmp[i][j].get_f1();
+            f2_tmp = grid_blocks_tmp[i][j].get_f2();
+            f3_tmp = grid_blocks_tmp[i][j].get_f3();
+            f4_tmp = grid_blocks_tmp[i][j].get_f4();
+            f5_tmp = grid_blocks_tmp[i][j].get_f5();
+            f6_tmp = grid_blocks_tmp[i][j].get_f6();
+            f7_tmp = grid_blocks_tmp[i][j].get_f7();
+            f8_tmp = grid_blocks_tmp[i][j].get_f8();
             
-            bool wall_0 = grid_blocks[(int)(i + c0[0] * dt / dx)][(int)(j + c0[1] * dt / dx)].is_boundary();
-            bool wall_1 = grid_blocks[(int)(i + c1[0] * dt / dx)][(int)(j + c1[1] * dt / dx)].is_boundary();
-            bool wall_2 = grid_blocks[(int)(i + c2[0] * dt / dx)][(int)(j + c2[1] * dt / dx)].is_boundary();
-            bool wall_3 = grid_blocks[(int)(i + c3[0] * dt / dx)][(int)(j + c3[1] * dt / dx)].is_boundary();
-            bool wall_4 = grid_blocks[(int)(i + c4[0] * dt / dx)][(int)(j + c4[1] * dt / dx)].is_boundary();
-            bool wall_5 = grid_blocks[(int)(i + c5[0] * dt / dx)][(int)(j + c5[1] * dt / dx)].is_boundary();
-            bool wall_6 = grid_blocks[(int)(i + c6[0] * dt / dx)][(int)(j + c6[1] * dt / dx)].is_boundary();
-            bool wall_7 = grid_blocks[(int)(i + c7[0] * dt / dx)][(int)(j + c7[1] * dt / dx)].is_boundary();
-            bool wall_8 = grid_blocks[(int)(i + c8[0] * dt / dx)][(int)(j + c8[1] * dt / dx)].is_boundary();
+            wall_0 = grid_blocks[(int)(i + c0[0] * dt / dx)][(int)(j + c0[1] * dt / dx)].is_boundary();
+            wall_1 = grid_blocks[(int)(i + c1[0] * dt / dx)][(int)(j + c1[1] * dt / dx)].is_boundary();
+            wall_2 = grid_blocks[(int)(i + c2[0] * dt / dx)][(int)(j + c2[1] * dt / dx)].is_boundary();
+            wall_3 = grid_blocks[(int)(i + c3[0] * dt / dx)][(int)(j + c3[1] * dt / dx)].is_boundary();
+            wall_4 = grid_blocks[(int)(i + c4[0] * dt / dx)][(int)(j + c4[1] * dt / dx)].is_boundary();
+            wall_5 = grid_blocks[(int)(i + c5[0] * dt / dx)][(int)(j + c5[1] * dt / dx)].is_boundary();
+            wall_6 = grid_blocks[(int)(i + c6[0] * dt / dx)][(int)(j + c6[1] * dt / dx)].is_boundary();
+            wall_7 = grid_blocks[(int)(i + c7[0] * dt / dx)][(int)(j + c7[1] * dt / dx)].is_boundary();
+            wall_8 = grid_blocks[(int)(i + c8[0] * dt / dx)][(int)(j + c8[1] * dt / dx)].is_boundary();
             
             // propagation step
             if (!wall_0) {grid_blocks[(int)(i + c0[0] * dt / dx)][(int)(j + c0[1] * dt / dx)].set_f0(f0_tmp);}
             else {grid_blocks[i][j].set_f0(f0_tmp);}  
 
+            
             if (!wall_1) {grid_blocks[(int)(i + c1[0] * dt / dx)][(int)(j + c1[1] * dt / dx)].set_f1(f1_tmp);}
             else {grid_blocks[i][j].set_f1(f3_tmp);}       
             
@@ -266,14 +299,87 @@ void Game::update()
 
             if (!wall_8) {grid_blocks[(int)(i + c8[0] * dt / dx)][(int)(j + c8[1] * dt / dx)].set_f8(f8_tmp);}
             else {grid_blocks[i][j].set_f8(f6_tmp);}  
-                
+            
+            
+            // FIXME : periodic boundary conditions 
+            /*
+            if (!wall_1) {grid_blocks[(int)(i + c1[0] * dt / dx)][(int)(j + c1[1] * dt / dx)].set_f1(f1_tmp);}
+            else {grid_blocks[1][j].set_f1(f1_tmp);}      
+            
+            if (!wall_2) {grid_blocks[(int)(i + c2[0] * dt / dx)][(int)(j + c2[1] * dt / dx)].set_f2(f2_tmp);}
+            else {grid_blocks[i][grid_height-2].set_f2(f2_tmp);}  
+
+            if (!wall_3) {grid_blocks[(int)(i + c3[0] * dt / dx)][(int)(j + c3[1] * dt / dx)].set_f3(f3_tmp);}
+            else {grid_blocks[grid_width-2][j].set_f3(f3_tmp);}  
+
+            if (!wall_4) {grid_blocks[(int)(i + c4[0] * dt / dx)][(int)(j + c4[1] * dt / dx)].set_f4(f4_tmp);}
+            else {grid_blocks[i][1].set_f4(f4_tmp);}  
+
+            if (!wall_5) {grid_blocks[(int)(i + c5[0] * dt / dx)][(int)(j + c5[1] * dt / dx)].set_f5(f5_tmp);}
+            else 
+            {
+                if (wall_5 && wall_6)
+                {
+                    grid_blocks[i][grid_height-2].set_f5(f5_tmp);
+                }
+                else
+                {
+                    grid_blocks[1][j].set_f5(f5_tmp);       
+                }
+            }  
+
+            if (!wall_6) {grid_blocks[(int)(i + c6[0] * dt / dx)][(int)(j + c6[1] * dt / dx)].set_f6(f6_tmp);}
+            else 
+            {
+                if (wall_6 && wall_5)
+                {
+                    grid_blocks[i][grid_height-2].set_f6(f6_tmp);
+
+                }
+                else
+                {
+                    grid_blocks[1][j].set_f6(f6_tmp);
+
+                }
+            }  
+
+            if (!wall_7) {grid_blocks[(int)(i + c7[0] * dt / dx)][(int)(j + c7[1] * dt / dx)].set_f7(f7_tmp);}
+            else 
+            {
+                if (wall_7 && wall_8)
+                {
+                    grid_blocks[i][1].set_f7(f7_tmp);
+
+                }
+                else
+                {
+                    grid_blocks[grid_width-2][j].set_f7(f7_tmp);
+
+                }
+            }  
+
+            if (!wall_8) {grid_blocks[(int)(i + c8[0] * dt / dx)][(int)(j + c8[1] * dt / dx)].set_f8(f8_tmp);}
+            else 
+            {
+                if (wall_8 && wall_5)
+                {
+                    grid_blocks[1][j].set_f8(f8_tmp);
+
+                }
+                else
+                {
+                    grid_blocks[i][1].set_f8(f8_tmp);
+        
+                }
+            } 
+            */
                 
         }
     }
 
 
     
-    //int x = 1; int y = 1;
+    int x = 1; int y = 1;
     //std::cout << "f0  = " << grid_blocks[x][y].get_f1() << ", f0_eq = " << grid_blocks[x][y].get_f1_eq()  << '\n'; 
     //std::cout << "f1  = " << grid_blocks[x][y].get_f1() << ", f1_eq = " << grid_blocks[x][y].get_f1_eq()  <<'\n';
     //std::cout << "f2  = " << grid_blocks[x][y].get_f2() << ", f2_eq = " << grid_blocks[x][y].get_f2_eq()  <<'\n';
@@ -284,7 +390,7 @@ void Game::update()
     //std::cout << "f7  = " << grid_blocks[x][y].get_f7() << ", f7_eq = " << grid_blocks[x][y].get_f7_eq()  <<'\n';
     //std::cout << "f8  = " << grid_blocks[x][y].get_f8() << ", f8_eq = " << grid_blocks[x][y].get_f8_eq()  <<'\n';
     //
-    //std::cout << "rho = " << grid_blocks[x][y].get_rho()  << ", u = (" << grid_blocks[x][y].get_u()[0] << ", " << grid_blocks[x][y].get_u()[1] << ")" <<'\n';
+    //std::cout << "rho = " << grid_blocks[x][y].get_rho()  << ", u_norm = (" << grid_blocks[x][y].get_u_normalized()[0] << ", " << grid_blocks[x][y].get_u_normalized()[1] << ")" <<'\n';
     
 
 }
@@ -317,30 +423,18 @@ void Game::render()
 
             std::vector<float> u = grid_blocks[i][j].get_u();
             std::vector<float> u_norm = grid_blocks[i][j].get_u_normalized();
-            float u_magn = std::sqrt(u_norm[0]*u_norm[0] + u_norm[1]*u_norm[1]);
+            float u_magn = std::sqrt(u[0]*u[0] + u[1]*u[1]);
 
             float theta = std::atan2(u_norm[1], u_norm[0]);
             //draw window border
             if (!is_wall)
             {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
 
-                SDL_SetRenderDrawColor(renderer, 0, u_magn * 255, u_magn * 255, 255);
-                if (theta < - 0,523599 && theta >= - 3.14 + 0,523599)
-                {
-                    SDL_SetRenderDrawColor(renderer, 0, u_magn * 125, u_magn * 255, 255);
-                }
-                else if (theta > 0,523599 && theta <= 3.14 - 0,523599)
-                {
-                    SDL_SetRenderDrawColor(renderer,  0, u_magn * 255, u_magn * 125, 255);
-                }
-                
-                grid_blocks[i][j].draw();
-
-
-                SDL_SetRenderDrawColor(renderer, u_magn * 255, 0, 0, 255);
-                SDL_RenderDrawLine(renderer, i * dx + (dx / 2), j * dx + (dx / 2), i * dx + (dx / 2) + (10 * u_norm[0]), j * dx + (dx / 2) + (10 * u_norm[1]));
+                SDL_SetRenderDrawColor(renderer, std::abs(u[0] / u_magn) * 125, 0, std::abs(u[1] / u_magn) * 255, 255);
+                //SDL_RenderDrawLine(renderer, i * dx + (dx / 2), j * dx + (dx / 2), i * dx + (dx / 2) + (u_norm[0]) , j * dx + (dx / 2) + (u_norm[1]) );
+                SDL_RenderDrawPoint(renderer, i * dx + (dx / 2), j * dx + (dx / 2));
+                //grid_blocks[i][j].draw();
                 
             }
             else
@@ -353,11 +447,7 @@ void Game::render()
 
         }
     }
-    
-    //grid_blocks[1][1].draw();
-    //grid_blocks[2][10].draw();
-    //grid_blocks[8][8].draw();
-    //grid_blocks[40][30].draw();
+
     
 
     SDL_RenderPresent(renderer);

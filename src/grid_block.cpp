@@ -187,8 +187,8 @@ std::vector<float> GridBlock::get_u_normalized()
     }
     else
     {
-        u_norm[0] /= norm;
-        u_norm[1] /= norm;
+        u_norm[0] = u_norm[0] / (float)norm;
+        u_norm[1] = u_norm[1] / (float)norm;
         return u_norm;
     }
 }

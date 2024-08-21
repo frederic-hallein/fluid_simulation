@@ -75,6 +75,7 @@ private:
     float rho;
     std::vector<float> u = { 0, 0 };
 
+
     std::vector<float> c0 = { 0, 0 };
     std::vector<float> c1 = { 1, 0 };
     std::vector<float> c2 = { 0, 1 };

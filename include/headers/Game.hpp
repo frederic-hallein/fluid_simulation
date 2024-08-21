@@ -24,10 +24,10 @@ private:
     int grid_height;
 
 
-    int dx = 5; 
-    float dt = 0.001;
+    int dx = 2; 
+    float dt = 1;
 
-    float tau = 1.0;
+    float tau = 50;
     float c_s;
     float nu;
     
