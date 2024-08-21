@@ -4,7 +4,7 @@
 #include "Game.hpp"
 #include "Timer.hpp"
 
-const int SCREEN_WIDTH = 800;
+const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 400;
 
 int main(int argc, char* argv[])

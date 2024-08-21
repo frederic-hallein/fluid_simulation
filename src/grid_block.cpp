@@ -12,9 +12,6 @@ GridBlock::GridBlock(SDL_Renderer* renderer, int dx, float dt, float x_pos, floa
 
 GridBlock::~GridBlock() {}
 
-float GridBlock::get_x_pos() {return x_pos;}
-float GridBlock::get_y_pos() {return y_pos;}
-
 void GridBlock::set_grid_velocity()
 {
     if (!is_wall)
@@ -124,28 +121,7 @@ void GridBlock::set_f8_eq(float c_s)
     this->f8_eq = f8_eq;
 }
 
-float GridBlock::get_f0() {return f0;}
-float GridBlock::get_f1() {return f1;}
-float GridBlock::get_f2() {return f2;}
-float GridBlock::get_f3() {return f3;}
-float GridBlock::get_f4() {return f4;}
-float GridBlock::get_f5() {return f5;}
-float GridBlock::get_f6() {return f6;}
-float GridBlock::get_f7() {return f7;}
-float GridBlock::get_f8() {return f8;}
-
-float GridBlock::get_f0_eq() {return f0_eq;}
-float GridBlock::get_f1_eq() {return f1_eq;}
-float GridBlock::get_f2_eq() {return f2_eq;}
-float GridBlock::get_f3_eq() {return f3_eq;}
-float GridBlock::get_f4_eq() {return f4_eq;}
-float GridBlock::get_f5_eq() {return f5_eq;}
-float GridBlock::get_f6_eq() {return f6_eq;}
-float GridBlock::get_f7_eq() {return f7_eq;}
-float GridBlock::get_f8_eq() {return f8_eq;}
-
 void GridBlock::set_rho(std::vector<float> f) {this->rho = m * (f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8]);}
-float GridBlock::get_rho() {return rho;}
 
 void GridBlock::set_u(std::vector<float> f)
 {
@@ -175,8 +151,6 @@ void GridBlock::set_u(std::vector<float> f)
 
 }
 
-std::vector<float> GridBlock::get_u() {return u;}
-
 std::vector<float> GridBlock::get_u_normalized() 
 {
     float norm = std::sqrt(u[0]*u[0] + u[1]*u[1]);
@@ -187,24 +161,13 @@ std::vector<float> GridBlock::get_u_normalized()
     }
     else
     {
-        u_norm[0] = u_norm[0] / (float)norm;
-        u_norm[1] = u_norm[1] / (float)norm;
+        u_norm[0] = u_norm[0] / norm;
+        u_norm[1] = u_norm[1] / norm;
         return u_norm;
     }
 }
 
-std::vector<float> GridBlock::get_c0() {return c0;}
-std::vector<float> GridBlock::get_c1() {return c1;}
-std::vector<float> GridBlock::get_c2() {return c2;}
-std::vector<float> GridBlock::get_c3() {return c3;}
-std::vector<float> GridBlock::get_c4() {return c4;}
-std::vector<float> GridBlock::get_c5() {return c5;}
-std::vector<float> GridBlock::get_c6() {return c6;}
-std::vector<float> GridBlock::get_c7() {return c7;}
-std::vector<float> GridBlock::get_c8() {return c8;}
-
 void GridBlock::set_boundary() {this->is_wall = true;}
-bool GridBlock::is_boundary() {return is_wall;}
 
 void GridBlock::draw()
 {

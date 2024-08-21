@@ -10,9 +10,6 @@ public:
     GridBlock(SDL_Renderer* renderer, int dx, float dt, float x_pos, float y_pos);
     ~GridBlock();
 
-    float get_x_pos();
-    float get_y_pos();
-
     void set_grid_velocity();
 
     void set_f0(float f0); void set_f0_eq(float c_s);
@@ -25,35 +22,35 @@ public:
     void set_f7(float f7); void set_f7_eq(float c_s);
     void set_f8(float f8); void set_f8_eq(float c_s);
 
-    float get_f0(); float get_f0_eq();
-    float get_f1(); float get_f1_eq();
-    float get_f2(); float get_f2_eq();
-    float get_f3(); float get_f3_eq();
-    float get_f4(); float get_f4_eq();
-    float get_f5(); float get_f5_eq();
-    float get_f6(); float get_f6_eq();
-    float get_f7(); float get_f7_eq();
-    float get_f8(); float get_f8_eq();
+    float get_f0() const {return f0;}; float get_f0_eq() const {return f0_eq;};
+    float get_f1() const {return f1;}; float get_f1_eq() const {return f1_eq;};
+    float get_f2() const {return f2;}; float get_f2_eq() const {return f2_eq;};
+    float get_f3() const {return f3;}; float get_f3_eq() const {return f3_eq;};
+    float get_f4() const {return f4;}; float get_f4_eq() const {return f4_eq;};
+    float get_f5() const {return f5;}; float get_f5_eq() const {return f5_eq;};
+    float get_f6() const {return f6;}; float get_f6_eq() const {return f6_eq;};
+    float get_f7() const {return f7;}; float get_f7_eq() const {return f7_eq;};
+    float get_f8() const {return f8;}; float get_f8_eq() const {return f8_eq;};
 
     void set_rho(std::vector<float> f);
-    float get_rho();
+    float get_rho() const {return rho;};
 
     void set_u(std::vector<float> f);
-    std::vector<float> get_u();
+    std::vector<float> get_u() const {return u;};
     std::vector<float> get_u_normalized();
 
-    std::vector<float> get_c0();
-    std::vector<float> get_c1();
-    std::vector<float> get_c2();
-    std::vector<float> get_c3();
-    std::vector<float> get_c4();
-    std::vector<float> get_c5();
-    std::vector<float> get_c6();
-    std::vector<float> get_c7();
-    std::vector<float> get_c8();
+    std::vector<float> get_c0() const {return c0;};
+    std::vector<float> get_c1() const {return c1;};
+    std::vector<float> get_c2() const {return c2;};
+    std::vector<float> get_c3() const {return c3;};
+    std::vector<float> get_c4() const {return c4;};
+    std::vector<float> get_c5() const {return c5;};
+    std::vector<float> get_c6() const {return c6;};
+    std::vector<float> get_c7() const {return c7;};
+    std::vector<float> get_c8() const {return c8;};
 
     void set_boundary();
-    bool is_boundary();
+    bool is_boundary() const {return is_wall;};
 
     void draw();
     
