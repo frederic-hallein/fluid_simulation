@@ -52,8 +52,7 @@ public:
     void set_boundary();
     bool is_boundary() const {return is_wall;};
 
-    void draw();
-    
+    void draw();    
 
 private:
     SDL_Renderer* renderer = nullptr;

@@ -34,7 +34,14 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
         std::cout << "Error: " << SDL_GetError() << '\n';
     }
 
-    // keep hold of SCREEN_WIDTH and SCREEN_HEIGHT
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (texture == nullptr)
+    {
+        std::cout << "Could not create texture." << '\n';
+        std::cout << "Error: " << SDL_GetError() << '\n';
+    }
+
+    // keep hold of grid width and height
     this->grid_width = SCREEN_WIDTH / dx;
     this->grid_height = SCREEN_HEIGHT / dx;
 
@@ -66,7 +73,7 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
             } 
 
             // draw disk
-            //if ((i - grid_width / 4) * (i - grid_width / 4) + (j - grid_height / 2) * (j - grid_height / 2) < 90) {
+            //if ((i - grid_width / 2) * (i - grid_width / 2) + (j - grid_height / 2) * (j - grid_height / 2) < 90) {
             //    grid_blocks[i][j].set_boundary();
             //    grid_blocks_tmp[i][j].set_boundary();
             //} 
@@ -135,7 +142,10 @@ void Game::init(const char* title, int SCREEN_WIDTH, int SCREEN_HEIGHT, bool ful
     //std::cout << "f8  = " << grid_blocks[x][y].get_f8() << ", f8_eq = " << grid_blocks[x][y].get_f8_eq()  <<'\n';
     //
     //std::cout << "rho = " << grid_blocks[x][y].get_rho()  << ", u = (" << grid_blocks[x][y].get_u()[0] << ", " << grid_blocks[x][y].get_u()[1] << ")" <<'\n';
-    
+        
+        
+
+
 
 }
 
@@ -281,86 +291,13 @@ void Game::update()
             if (!wall_8) {grid_blocks[(int)(i + c8[0] * dt / dx)][(int)(j + c8[1] * dt / dx)].set_f8(f8_tmp);}
             else {grid_blocks[i][j].set_f8(f6_tmp);}  
             
-            
-            // FIXME : periodic boundary conditions 
-            /*
-            if (!wall_1) {grid_blocks[(int)(i + c1[0] * dt / dx)][(int)(j + c1[1] * dt / dx)].set_f1(f1_tmp);}
-            else {grid_blocks[1][j].set_f1(f1_tmp);}      
-            
-            if (!wall_2) {grid_blocks[(int)(i + c2[0] * dt / dx)][(int)(j + c2[1] * dt / dx)].set_f2(f2_tmp);}
-            else {grid_blocks[i][grid_height-2].set_f2(f2_tmp);}  
-
-            if (!wall_3) {grid_blocks[(int)(i + c3[0] * dt / dx)][(int)(j + c3[1] * dt / dx)].set_f3(f3_tmp);}
-            else {grid_blocks[grid_width-2][j].set_f3(f3_tmp);}  
-
-            if (!wall_4) {grid_blocks[(int)(i + c4[0] * dt / dx)][(int)(j + c4[1] * dt / dx)].set_f4(f4_tmp);}
-            else {grid_blocks[i][1].set_f4(f4_tmp);}  
-
-            if (!wall_5) {grid_blocks[(int)(i + c5[0] * dt / dx)][(int)(j + c5[1] * dt / dx)].set_f5(f5_tmp);}
-            else 
-            {
-                if (wall_5 && wall_6)
-                {
-                    grid_blocks[i][grid_height-2].set_f5(f5_tmp);
-                }
-                else
-                {
-                    grid_blocks[1][j].set_f5(f5_tmp);       
-                }
-            }  
-
-            if (!wall_6) {grid_blocks[(int)(i + c6[0] * dt / dx)][(int)(j + c6[1] * dt / dx)].set_f6(f6_tmp);}
-            else 
-            {
-                if (wall_6 && wall_5)
-                {
-                    grid_blocks[i][grid_height-2].set_f6(f6_tmp);
-
-                }
-                else
-                {
-                    grid_blocks[1][j].set_f6(f6_tmp);
-
-                }
-            }  
-
-            if (!wall_7) {grid_blocks[(int)(i + c7[0] * dt / dx)][(int)(j + c7[1] * dt / dx)].set_f7(f7_tmp);}
-            else 
-            {
-                if (wall_7 && wall_8)
-                {
-                    grid_blocks[i][1].set_f7(f7_tmp);
-
-                }
-                else
-                {
-                    grid_blocks[grid_width-2][j].set_f7(f7_tmp);
-
-                }
-            }  
-
-            if (!wall_8) {grid_blocks[(int)(i + c8[0] * dt / dx)][(int)(j + c8[1] * dt / dx)].set_f8(f8_tmp);}
-            else 
-            {
-                if (wall_8 && wall_5)
-                {
-                    grid_blocks[1][j].set_f8(f8_tmp);
-
-                }
-                else
-                {
-                    grid_blocks[i][1].set_f8(f8_tmp);
-        
-                }
-            } 
-            */
                 
         }
     }
 
 
     
-    //int x = grid_width/2; int y = grid_height/2;
+    int x = grid_width/2; int y = grid_height/2;
 //
     //std::cout << "f0  = " << grid_blocks[x][y].get_f1() << ", f0_eq = " << grid_blocks[x][y].get_f1_eq()  << '\n'; 
     //std::cout << "f1  = " << grid_blocks[x][y].get_f1() << ", f1_eq = " << grid_blocks[x][y].get_f1_eq()  <<'\n';
@@ -384,6 +321,7 @@ void Game::render()
     // draw grid
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
+    
     for (int i = 0; i <= grid_width; i++) 
     {
         //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -396,47 +334,105 @@ void Game::render()
         //SDL_RenderDrawLine(renderer, 0, j * dx, grid_width * dx, j * dx);
     }
 
-    //color squares
-    for (int i = 0; i <= grid_width; i++)
-    {
-        for (int j = 0; j <= grid_height; j++)
-        {
-            bool is_wall = grid_blocks[i][j].is_boundary();
+    //SDL_SetRenderTarget(renderer, texture);
 
-            std::vector<float> u = grid_blocks[i][j].get_u();
-            std::vector<float> u_norm = grid_blocks[i][j].get_u_normalized();
+
+    //color squares
+    /*
+    int width = grid_width * dx;
+    int height = grid_height * dx;
+    pixels = new Uint32[width * height];
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            bool is_wall = grid_blocks[i/dx][j/dx].is_boundary();
+
+            std::vector<float> u = grid_blocks[i/dx][j/dx].get_u();
+            //std::vector<float> u_norm = grid_blocks[i][j].get_u_normalized();
             float u_magn = std::sqrt(u[0]*u[0] + u[1]*u[1]);
 
             //draw window border
             if (!is_wall)
             {
 
-                SDL_SetRenderDrawColor(renderer, std::abs(u[1] / u_magn) * 255, std::abs(u[0] / u_magn) * 225, 0, 255);
+                //SDL_SetRenderDrawColor(renderer, std::abs(u[1] / u_magn) * 255, std::abs(u[0] / u_magn) * 255, 0, 255);
                 //SDL_RenderDrawLine(renderer, i * dx + (dx / 2), j * dx + (dx / 2), i * dx + (dx / 2) + (10 * u_norm[0]) , j * dx + (dx / 2) + (10 * u_norm[1]) );
                 //SDL_RenderDrawPoint(renderer, i * dx + (dx / 2), j * dx + (dx / 2));
-                grid_blocks[i][j].draw();
-                
+                //grid_blocks[i][j].draw();
+                r = std::abs(u[0] / u_magn) * 255;
+                g = std::abs(u[1] / u_magn) * 255;
+                b = 0;
+
             }
             else
             {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                grid_blocks[i][j].draw();
-
+                //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                //grid_blocks[i][j].draw();
+                r = 255;
+                g = 0;
+                b = 0;
             }
+
+            Uint32 pixel_color = SDL_MapRGB(SDL_GetWindowSurface(window)->format, r, g, b);
+            pixels[i + j * width] = pixel_color;
+
 
 
         }
     }
 
+    // Update the texture with the pixel data
+    SDL_UpdateTexture(texture, nullptr, pixels, width * sizeof(Uint32));
+
+    // Render the texture to the window
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+    SDL_RenderPresent(renderer);
+    */
+    
+    // Create an SDL_Texture
+    int width = grid_width * dx;
+    int height = grid_height * dx;
+    Uint32* pixels = new Uint32[width * height];
+
+    // Generate random colors for each pixel
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+
+            // FIXME : SDL_MapRGB does not recognise red channel
+            Uint8 r = static_cast<Uint8>(rand() % 256);
+            Uint8 g = static_cast<Uint8>(rand() % 256);
+            Uint8 b = static_cast<Uint8>(rand() % 256);
+
+            // Map RGB values to the current pixel format
+            Uint32 pixel_color = SDL_MapRGB(SDL_GetWindowSurface(window)->format, r, g, b);
+
+            // Assign the color to the pixel
+            pixels[x + y * width] = pixel_color;
+
+        }
+    }
+
+    // Update the texture with the pixel data
+    SDL_UpdateTexture(texture, nullptr, pixels, width * sizeof(Uint32));
+
+    // Render the texture to the window
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+    SDL_RenderPresent(renderer);
+    //SDL_Delay(1000 / 60);
     
 
-    SDL_RenderPresent(renderer);
 }
 
 void Game::clean()
 {
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
+    delete[] pixels;
+    SDL_DestroyTexture(texture);
     SDL_Quit();
 }
 

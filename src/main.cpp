@@ -29,4 +29,3 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-// TODO : optimize code. Maybe replace vectors by std::array()?

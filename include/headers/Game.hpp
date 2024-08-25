@@ -55,13 +55,12 @@ private:
     bool is_running = true;   
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
+    SDL_Texture* texture = nullptr;
     SDL_Event event;
 
     std::vector<std::vector<GridBlock>> grid_blocks;
     std::vector<std::vector<GridBlock>> grid_blocks_tmp;
 
-    
-    
-
+    Uint32* pixels; 
 
 };
